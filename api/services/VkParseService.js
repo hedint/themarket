@@ -1,6 +1,6 @@
 
 const GROUP_ID = '-120508713';
-var VK = require('vksdk');
+const VK = require('vksdk');
 
 var ServiceVkParse = function () {
     this.group_id = GROUP_ID;
@@ -41,4 +41,76 @@ ServiceVkParse.fn.getLastPosts = function (count, callback) {
     this.getPosts(count, offset, callback);
 };
 
+ServiceVkParse.fn.parsePost = function (vk_post) {
+  if (!vk_post.signer_id || vk_post.marked_as_ads) {
+    return false;
+  }
+  let post = {};
+  post.vk_id = parseInt(vk_post.id, 10);
+  post.vk_date = parseInt(vk_post.date, 10);
+  post.vk_text = vk_post.text;
+  post.vk_author = parseInt(vk_post.signer_id, 10);
+  post.vk_likes = parseInt(vk_post.likes.count, 10);
+  post.vk_comments = parseInt(vk_post.comments.count, 10);
+  post.delivery = this.parseDelivery(vk_post.text);
+  post.cost = this.parseCost(vk_post.text);
+  post.name = this.parseName(vk_post.text);
+  return post;
+};
+ServiceVkParse.fn.parseCost = function (text) {
+  let regular = /[0-9]+(\s|,|\.)?[0-9]*\s?(k|K|к|К|р|Р|r|R|₽){0,10}/gi;
+  let result = text.match(regular);
+  let cost = false;
+  if (result) {
+    cost = this.removeSpace(result[0]);
+    result_length = result.length;
+    result.forEach((item) => {
+      item = this.removeSpace(item);
+      if (['к','К','k','K'].indexOf(item[item.length - 1 ]) !== -1) {
+        cost = parseInt(item, 10);
+        cost = cost * 1000;
+      }
+      if (['р','Р', 'r', 'R'].indexOf(item[item.length - 1 ]) !== -1) {
+        cost = item;
+      }
+    });
+    cost = parseInt(cost, 10);
+    return cost;
+  }
+  return false;
+};
+
+ServiceVkParse.fn.parseName = function (text) {
+  let regular = /[a-zA-Z \-\\\/\d]+/i;
+  let result = text.match(regular);
+  if (result) {
+    return this.trim(result[0]);
+  }
+  return false;
+};
+
+ServiceVkParse.fn.parseDelivery = function (text) {
+  let regular = /(шип|доставка|доставлю)/i;
+  let result = text.match(regular);
+  if (result) {
+    return true;
+  }
+  return false;
+};
+
+ServiceVkParse.fn.removeSpace = function (text) {
+  var VRegExp = new RegExp(/\s|,|\.+/g);
+  var VResult = text.replace(VRegExp, '');
+  return VResult
+};
+
+ServiceVkParse.fn.trim = function (text) {
+  var VRegExp =new RegExp(/^(\s|\u00A0)+/g);
+  var VResult = text.replace(VRegExp, '');
+  return VResult
+};
+
+ServiceVkParse.fn.parseTown = function (text) {
+
+};
 module.exports = new ServiceVkParse();
