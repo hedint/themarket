@@ -42,7 +42,7 @@ ServiceVkParse.fn.getLastPosts = function (count, callback) {
 };
 
 ServiceVkParse.fn.parsePost = function (vk_post) {
-  if (!vk_post.signer_id || vk_post.marked_as_ads) {
+  if (!vk_post.signer_id || vk_post.marked_as_ads || this.isSearchPost(vk_post.text)) {
     return false;
   }
   let post = {};
@@ -62,8 +62,7 @@ ServiceVkParse.fn.parseCost = function (text) {
   let result = text.match(regular);
   let cost = false;
   if (result) {
-    cost = this.removeSpace(result[0]);
-    result_length = result.length;
+    cost = this.removeSpace(result[result.length -1]);
     result.forEach((item) => {
       item = this.removeSpace(item);
       if (['к','К','k','K'].indexOf(item[item.length - 1 ]) !== -1) {
@@ -81,7 +80,7 @@ ServiceVkParse.fn.parseCost = function (text) {
 };
 
 ServiceVkParse.fn.parseName = function (text) {
-  let regular = /[a-zA-Z \-\\\/\d]+/i;
+  let regular = /[a-zA-Z \-\\\/\*\d]+/i;
   let result = text.match(regular);
   if (result) {
     return this.trim(result[0]);
@@ -90,7 +89,7 @@ ServiceVkParse.fn.parseName = function (text) {
 };
 
 ServiceVkParse.fn.parseDelivery = function (text) {
-  let regular = /(шип|доставка|доставлю)/i;
+  let regular = /(шип|доставка|доставлю|почта)/i;
   let result = text.match(regular);
   if (result) {
     return true;
@@ -110,6 +109,14 @@ ServiceVkParse.fn.trim = function (text) {
   return VResult
 };
 
+ServiceVkParse.fn.isSearchPost = function (text) {
+  let regular = /(ищу|куплю)/i;
+  let result = text.match(regular);
+  if (result) {
+    return true;
+  }
+  return false;
+};
 ServiceVkParse.fn.parseTown = function (text) {
 
 };
