@@ -55,10 +55,12 @@ ServiceVkParse.fn.parsePost = function (vk_post) {
   post.delivery = this.parseDelivery(vk_post.text);
   post.cost = this.parseCost(vk_post.text);
   post.name = this.parseName(vk_post.text);
+  post.town = this.parseTown(vk_post.text);
+  post.photos = this.parsePhoto(vk_post.attachments);
   return post;
 };
 ServiceVkParse.fn.parseCost = function (text) {
-  let regular = /[0-9]+(\s|,|\.)?[0-9]*\s?(k|K|к|К|р|Р|r|R|₽){0,10}/gi;
+  let regular = /[0-9]+( |,|\.)?[0-9]*\s?(k|K|к|К|р|Р|r|R|₽){0,10}/gi;
   let result = text.match(regular);
   let cost = false;
   if (result) {
@@ -89,7 +91,7 @@ ServiceVkParse.fn.parseName = function (text) {
 };
 
 ServiceVkParse.fn.parseDelivery = function (text) {
-  let regular = /(шип|доставка|доставлю|почта)/i;
+  let regular = /(шип|доставка|доставлю|отправлю|ship|почта|почтой|отправка)/i;
   let result = text.match(regular);
   if (result) {
     return true;
@@ -105,8 +107,9 @@ ServiceVkParse.fn.removeSpace = function (text) {
 
 ServiceVkParse.fn.trim = function (text) {
   var VRegExp =new RegExp(/^(\s|\u00A0)+/g);
-  var VResult = text.replace(VRegExp, '');
-  return VResult
+  var result = text.replace(VRegExp, '');
+  var VRegExp =new RegExp(/(\s|\u00A0)+$/g);
+  return result.replace(VRegExp, '');
 };
 
 ServiceVkParse.fn.isSearchPost = function (text) {
@@ -117,7 +120,53 @@ ServiceVkParse.fn.isSearchPost = function (text) {
   }
   return false;
 };
+ServiceVkParse.fn.parsePhoto = function (attachments) {
+  let photos = [];
+  attachments.forEach(function (item) {
+    photos.push({
+      thumb : item.photo.photo_130,
+      middle : item.photo.photo_604,
+      max : item.photo.photo_1280
+    });
+  })
+  return photos;
+};
 ServiceVkParse.fn.parseTown = function (text) {
-
+  let town_list = {
+    'Мск' : 'Москва',
+    'Default city' : 'Москва',
+    'mck' : 'Москва',
+    'msk' : 'Москва',
+    'Москва' : 'Москва',
+    'Спб' : 'Санкт-петербург',
+    'Ленинград' : 'Санкт-петербург',
+    'Санкт-петербург': 'Санкт-петербург',
+    'Челябинск' : 'Челябинск',
+    'Воронеж' : 'Воронеж',
+    'Новосибирск' : 'Новосибирск',
+    'Нск' : 'Новосибирск',
+    'Новосиб' : 'Новосибирск',
+    'Курск' : 'Курск',
+    'Саратов' : 'Саратов',
+    'Уфа' : 'Уфа',
+    'Тула' : 'Тула',
+    'Ставрополь' : 'Ставрополь'
+  };
+  let result = false;
+  let BreakException = {};
+  text = text.toLowerCase();
+  try {
+    for (let key in town_list) {
+      if (town_list.hasOwnProperty(key)) {
+        if (text.indexOf(key.toLowerCase()) !== -1) {
+          result = town_list[key];
+          throw new BreakException();
+        }
+      }
+    }
+  } catch (err) {
+    //
+  }
+  return result;
 };
 module.exports = new ServiceVkParse();

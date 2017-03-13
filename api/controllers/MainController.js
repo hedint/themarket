@@ -9,7 +9,6 @@ module.exports = {
 	index : (req, res) => {
         VkParseService.getLastPosts(10, (vk_posts) => {
           let items = vk_posts.response.items;
-
           let posts = [];
           items.forEach((item) => {
             let tmp_post = VkParseService.parsePost(item);
