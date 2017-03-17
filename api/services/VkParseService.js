@@ -93,32 +93,23 @@ ServiceVkParse.fn.parseName = function (text) {
 ServiceVkParse.fn.parseDelivery = function (text) {
   let regular = /(шип|доставка|доставлю|отправлю|ship|почта|почтой|отправка)/i;
   let result = text.match(regular);
-  if (result) {
-    return true;
-  }
-  return false;
+  return Array.isArray(result);
 };
 
 ServiceVkParse.fn.removeSpace = function (text) {
-  var VRegExp = new RegExp(/\s|,|\.+/g);
-  var VResult = text.replace(VRegExp, '');
-  return VResult
+  const VRegExp = new RegExp(/\s|,|\.+/g);
+  return text.replace(VRegExp, '');
 };
 
 ServiceVkParse.fn.trim = function (text) {
-  var VRegExp =new RegExp(/^(\s|\u00A0)+/g);
-  var result = text.replace(VRegExp, '');
-  var VRegExp =new RegExp(/(\s|\u00A0)+$/g);
-  return result.replace(VRegExp, '');
+  let VRegExp =new RegExp(/^(\s|\u00A0)+(\s|\u00A0)+$/g);
+  return text.replace(VRegExp, '');
 };
 
 ServiceVkParse.fn.isSearchPost = function (text) {
   let regular = /(ищу|куплю)/i;
   let result = text.match(regular);
-  if (result) {
-    return true;
-  }
-  return false;
+  return Array.isArray(result);
 };
 ServiceVkParse.fn.parsePhoto = function (attachments) {
   let photos = [];
@@ -128,7 +119,7 @@ ServiceVkParse.fn.parsePhoto = function (attachments) {
       middle : item.photo.photo_604,
       max : item.photo.photo_1280
     });
-  })
+  });
   return photos;
 };
 ServiceVkParse.fn.parseTown = function (text) {
@@ -138,9 +129,12 @@ ServiceVkParse.fn.parseTown = function (text) {
     'mck' : 'Москва',
     'msk' : 'Москва',
     'Москва' : 'Москва',
+    'Москвы' : 'Москва',
+    'Москву' : 'Москва',
     'Спб' : 'Санкт-петербург',
     'Ленинград' : 'Санкт-петербург',
     'Санкт-петербург': 'Санкт-петербург',
+    'Питер' : 'Санкт-петербург',
     'Челябинск' : 'Челябинск',
     'Воронеж' : 'Воронеж',
     'Новосибирск' : 'Новосибирск',
@@ -165,7 +159,6 @@ ServiceVkParse.fn.parseTown = function (text) {
       }
     }
   } catch (err) {
-    //
   }
   return result;
 };
