@@ -8,9 +8,9 @@
 module.exports = {
 
   attributes: {
-    thumb : string,
-    middle : string,
-    max : string
+    thumb : 'string',
+    middle : 'string',
+    max : 'string'
   }
 };
 
