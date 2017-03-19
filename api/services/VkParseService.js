@@ -114,11 +114,13 @@ ServiceVkParse.fn.isSearchPost = function (text) {
 ServiceVkParse.fn.parsePhoto = function (attachments) {
   let photos = [];
   attachments.forEach(function (item) {
-    photos.push({
-      thumb : item.photo.photo_130,
-      middle : item.photo.photo_604,
-      max : item.photo.photo_1280
-    });
+      if (item.photo) {
+          photos.push({
+              thumb : item.photo.photo_130,
+              middle : item.photo.photo_604,
+              max : item.photo.photo_1280
+          });
+      }
   });
   return photos;
 };
